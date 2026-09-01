@@ -1,53 +1,29 @@
 const asyncHandler = require("express-async-handler");
-const Order = require("../models/Order");
+const orderService = require("../services/orderService");
+const { success } = require("../utils/apiResponse");
 
-// @route POST /api/orders  (customer checkout)
+// @route POST /api/orders (customer checkout)
 const createOrder = asyncHandler(async (req, res) => {
-  const { items, shippingAddress, shippingFee = 0 } = req.body;
-
-  if (!items || items.length === 0) {
-    res.status(400);
-    throw new Error("No order items provided");
-  }
-
-  const itemsTotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-
-  const order = await Order.create({
-    user: req.user._id,
-    items,
-    shippingAddress,
-    itemsTotal,
-    shippingFee,
-    total: itemsTotal + Number(shippingFee),
-  });
-
-  res.status(201).json(order);
+  const order = await orderService.createOrder(req.user._id, req.body);
+  res.status(201).json(success(order, 201));
 });
 
-// @route GET /api/orders/mine  (customer's own orders)
+// @route GET /api/orders/mine
 const getMyOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
-  res.json(orders);
+  const orders = await orderService.getMyOrders(req.user._id);
+  res.status(200).json(success(orders));
 });
 
-// @route GET /api/orders  (admin: all orders)
+// @route GET /api/orders (admin)
 const getAllOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find().populate("user", "firstName lastName email").sort({ createdAt: -1 });
-  res.json(orders);
+  const orders = await orderService.getAllOrders();
+  res.status(200).json(success(orders));
 });
 
-// @route PUT /api/orders/:id/status  (admin)
+// @route PUT /api/orders/:id/status (admin)
 const updateOrderStatus = asyncHandler(async (req, res) => {
-  const { status, paymentStatus } = req.body;
-  const order = await Order.findById(req.params.id);
-  if (!order) {
-    res.status(404);
-    throw new Error("Order not found");
-  }
-  if (status) order.status = status;
-  if (paymentStatus) order.paymentStatus = paymentStatus;
-  await order.save();
-  res.json(order);
+  const order = await orderService.updateOrderStatus(req.params.id, req.body);
+  res.status(200).json(success(order));
 });
 
 module.exports = { createOrder, getMyOrders, getAllOrders, updateOrderStatus };

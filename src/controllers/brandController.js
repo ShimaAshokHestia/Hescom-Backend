@@ -1,23 +1,20 @@
 const asyncHandler = require("express-async-handler");
-const Brand = require("../models/Brand");
+const brandService = require("../services/brandService");
+const { success } = require("../utils/apiResponse");
 
 const getBrands = asyncHandler(async (req, res) => {
-  const brands = await Brand.find().sort({ value: 1 });
-  res.json(brands);
+  const brands = await brandService.getBrands();
+  res.status(200).json(success(brands));
 });
 
 const createBrand = asyncHandler(async (req, res) => {
-  const brand = await Brand.create(req.body);
-  res.status(201).json(brand);
+  const brand = await brandService.createBrand(req.body);
+  res.status(201).json(success(brand, 201));
 });
 
 const deleteBrand = asyncHandler(async (req, res) => {
-  const brand = await Brand.findByIdAndDelete(req.params.id);
-  if (!brand) {
-    res.status(404);
-    throw new Error("Brand not found");
-  }
-  res.json({ success: true });
+  await brandService.deleteBrand(req.params.id);
+  res.status(200).json(success(null));
 });
 
 module.exports = { getBrands, createBrand, deleteBrand };

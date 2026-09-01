@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
 const User = require("../models/User");
+const AppError = require("../utils/AppError");
 
 // Verifies the Bearer token and attaches req.user
 const protect = asyncHandler(async (req, res, next) => {
@@ -12,21 +13,18 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 
   if (!token) {
-    res.status(401);
-    throw new Error("Not authorized, no token provided");
+    throw new AppError("Not authorized, no token provided", 401);
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = await User.findById(decoded.id);
     if (!req.user) {
-      res.status(401);
-      throw new Error("Not authorized, user no longer exists");
+      throw new AppError("Not authorized, user no longer exists", 401);
     }
     next();
   } catch (err) {
-    res.status(401);
-    throw new Error("Not authorized, token invalid or expired");
+    throw new AppError("Not authorized, token invalid or expired", 401);
   }
 });
 
@@ -35,8 +33,7 @@ const adminOnly = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     return next();
   }
-  res.status(403);
-  throw new Error("Admin access required");
+  throw new AppError("Admin access required", 403);
 };
 
 module.exports = { protect, adminOnly };
