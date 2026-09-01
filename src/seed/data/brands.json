@@ -1,0 +1,22 @@
+[
+  {
+    "value": "Lumière",
+    "key": "shop.brands.lumiere"
+  },
+  {
+    "value": "Maison Rose",
+    "key": "shop.brands.maisonRose"
+  },
+  {
+    "value": "Aurea",
+    "key": "shop.brands.aurea"
+  },
+  {
+    "value": "Botanica",
+    "key": "shop.brands.botanica"
+  },
+  {
+    "value": "Noir Atelier",
+    "key": "shop.brands.noirAtelier"
+  }
+]

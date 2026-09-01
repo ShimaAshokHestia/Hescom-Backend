@@ -1,0 +1,28 @@
+{
+  "categories": [
+    {
+      "value": "Skincare",
+      "key": "shop.categories.skincare"
+    },
+    {
+      "value": "Makeup",
+      "key": "shop.categories.makeup"
+    },
+    {
+      "value": "Hair Care",
+      "key": "shop.categories.hairCare"
+    },
+    {
+      "value": "Fragrance",
+      "key": "shop.categories.fragrance"
+    },
+    {
+      "value": "Bath & Body",
+      "key": "shop.categories.bathBody"
+    },
+    {
+      "value": "Men's Care",
+      "key": "shop.categories.mensCare"
+    }
+  ]
+}
