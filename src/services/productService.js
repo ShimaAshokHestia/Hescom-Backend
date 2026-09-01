@@ -1,5 +1,6 @@
 const Product = require("../models/Product");
 const AppError = require("../utils/AppError");
+const { toProductDetailDTO, toProductListDTOs } = require("../dtos/productDto");
 
 const SORT_MAP = {
   price_asc: { price: 1 },
@@ -56,7 +57,7 @@ const getProducts = async (params) => {
   ]);
 
   return {
-    items,
+    items: toProductListDTOs(items),
     total,
     page: pageNum,
     pages: Math.ceil(total / pageSize),
@@ -66,11 +67,12 @@ const getProducts = async (params) => {
 const getProductBySlug = async (slug) => {
   const product = await Product.findOne({ slug });
   if (!product) throw new AppError("Product not found", 404);
-  return product;
+  return toProductDetailDTO(product);
 };
 
 const createProduct = async (data) => {
-  return Product.create(data);
+  const product = await Product.create(data);
+  return toProductDetailDTO(product);
 };
 
 const updateProduct = async (id, data) => {
@@ -79,7 +81,7 @@ const updateProduct = async (id, data) => {
     runValidators: true,
   });
   if (!product) throw new AppError("Product not found", 404);
-  return product;
+  return toProductDetailDTO(product);
 };
 
 const deleteProduct = async (id) => {

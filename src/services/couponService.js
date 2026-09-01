@@ -1,12 +1,15 @@
 const Coupon = require("../models/Coupon");
 const AppError = require("../utils/AppError");
+const { toCouponDTO, toCouponDTOs } = require("../dtos/couponDto");
 
 const getCoupons = async () => {
-  return Coupon.find().sort({ createdAt: -1 });
+  const coupons = await Coupon.find().sort({ createdAt: -1 });
+  return toCouponDTOs(coupons);
 };
 
 const createCoupon = async (data) => {
-  return Coupon.create(data);
+  const coupon = await Coupon.create(data);
+  return toCouponDTO(coupon);
 };
 
 const updateCoupon = async (id, data) => {
@@ -15,7 +18,7 @@ const updateCoupon = async (id, data) => {
     runValidators: true,
   });
   if (!coupon) throw new AppError("Coupon not found", 404);
-  return coupon;
+  return toCouponDTO(coupon);
 };
 
 const deleteCoupon = async (id) => {

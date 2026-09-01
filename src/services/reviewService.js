@@ -1,11 +1,13 @@
 const Review = require("../models/Review");
 const Product = require("../models/Product");
 const AppError = require("../utils/AppError");
+const { toReviewDTO, toReviewDTOs } = require("../dtos/reviewDto");
 
 const getProductReviews = async (productId) => {
-  return Review.find({ product: productId, status: "approved" })
+  const reviews = await Review.find({ product: productId, status: "approved" })
     .populate("user", "firstName lastName")
     .sort({ createdAt: -1 });
+  return toReviewDTOs(reviews);
 };
 
 const createReview = async (userId, { productId, rating, comment }) => {
@@ -15,15 +17,17 @@ const createReview = async (userId, { productId, rating, comment }) => {
   const existing = await Review.findOne({ product: productId, user: userId });
   if (existing) throw new AppError("You already reviewed this product", 400);
 
-  return Review.create({ product: productId, user: userId, rating, comment });
+  const review = await Review.create({ product: productId, user: userId, rating, comment });
+  return toReviewDTO(review);
 };
 
 const getAllReviews = async (status) => {
   const query = status ? { status } : {};
-  return Review.find(query)
+  const reviews = await Review.find(query)
     .populate("user", "firstName lastName email")
     .populate("product", "name slug")
     .sort({ createdAt: -1 });
+  return toReviewDTOs(reviews);
 };
 
 const syncProductRating = async (productId) => {
@@ -50,7 +54,7 @@ const updateReviewStatus = async (id, status) => {
     await syncProductRating(review.product);
   }
 
-  return review;
+  return toReviewDTO(review);
 };
 
 const deleteReview = async (id) => {

@@ -1,12 +1,15 @@
 const Brand = require("../models/Brand");
 const AppError = require("../utils/AppError");
+const { toBrandDTO, toBrandDTOs } = require("../dtos/brandDto");
 
 const getBrands = async () => {
-  return Brand.find().sort({ value: 1 });
+  const brands = await Brand.find().sort({ value: 1 });
+  return toBrandDTOs(brands);
 };
 
 const createBrand = async (data) => {
-  return Brand.create(data);
+  const brand = await Brand.create(data);
+  return toBrandDTO(brand);
 };
 
 const deleteBrand = async (id) => {

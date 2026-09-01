@@ -1,5 +1,6 @@
 const Order = require("../models/Order");
 const AppError = require("../utils/AppError");
+const { toOrderDTO, toOrderDTOs } = require("../dtos/orderDto");
 
 const createOrder = async (userId, { items, shippingAddress, shippingFee = 0 }) => {
   if (!items || items.length === 0) {
@@ -8,7 +9,7 @@ const createOrder = async (userId, { items, shippingAddress, shippingFee = 0 }) 
 
   const itemsTotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-  return Order.create({
+  const order = await Order.create({
     user: userId,
     items,
     shippingAddress,
@@ -16,16 +17,19 @@ const createOrder = async (userId, { items, shippingAddress, shippingFee = 0 }) 
     shippingFee,
     total: itemsTotal + Number(shippingFee),
   });
+  return toOrderDTO(order);
 };
 
 const getMyOrders = async (userId) => {
-  return Order.find({ user: userId }).sort({ createdAt: -1 });
+  const orders = await Order.find({ user: userId }).sort({ createdAt: -1 });
+  return toOrderDTOs(orders);
 };
 
 const getAllOrders = async () => {
-  return Order.find()
+  const orders = await Order.find()
     .populate("user", "firstName lastName email")
     .sort({ createdAt: -1 });
+  return toOrderDTOs(orders);
 };
 
 const updateOrderStatus = async (id, { status, paymentStatus }) => {
@@ -35,7 +39,7 @@ const updateOrderStatus = async (id, { status, paymentStatus }) => {
   if (status) order.status = status;
   if (paymentStatus) order.paymentStatus = paymentStatus;
   await order.save();
-  return order;
+  return toOrderDTO(order);
 };
 
 module.exports = { createOrder, getMyOrders, getAllOrders, updateOrderStatus };

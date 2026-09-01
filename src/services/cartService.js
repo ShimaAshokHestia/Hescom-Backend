@@ -1,12 +1,13 @@
 const Cart = require("../models/Cart");
 const AppError = require("../utils/AppError");
+const { toCartDTO } = require("../dtos/cartDto");
 
 const getCart = async (userId) => {
   let cart = await Cart.findOne({ user: userId }).populate("items.product");
   if (!cart) {
     cart = await Cart.create({ user: userId, items: [] });
   }
-  return cart;
+  return toCartDTO(cart);
 };
 
 const replaceCart = async (userId, items = []) => {
@@ -15,7 +16,7 @@ const replaceCart = async (userId, items = []) => {
     { items },
     { new: true, upsert: true, runValidators: true }
   ).populate("items.product");
-  return cart;
+  return toCartDTO(cart);
 };
 
 const addItem = async (userId, { productId, quantity = 1 }) => {
@@ -30,7 +31,7 @@ const addItem = async (userId, { productId, quantity = 1 }) => {
   }
   await cart.save();
   await cart.populate("items.product");
-  return cart;
+  return toCartDTO(cart);
 };
 
 const removeItem = async (userId, productId) => {
@@ -40,7 +41,7 @@ const removeItem = async (userId, productId) => {
   cart.items = cart.items.filter((i) => i.product.toString() !== productId);
   await cart.save();
   await cart.populate("items.product");
-  return cart;
+  return toCartDTO(cart);
 };
 
 const clearCart = async (userId) => {
